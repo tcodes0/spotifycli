@@ -1,0 +1,17 @@
+github.com/agext/uuid v1.0.1 h1:Za6toqrdwQwHJzTfsgt3JaPuQ2xeYuak6N0513NdFeQ=
+github.com/agext/uuid v1.0.1/go.mod h1:S35kGCagARSdmRVLoWmwmevvhFsiZkmtEqdw4hcDePs=
+github.com/bndr/gotabulate v1.1.2 h1:yC9izuZEphojb9r+KYL4W9IJKO/ceIO8HDwxMA24U4c=
+github.com/bndr/gotabulate v1.1.2/go.mod h1:0+8yUgaPTtLRTjf49E8oju7ojpU11YmXyvq1LbPAb3U=
+github.com/golang/protobuf v1.1.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
+github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
+github.com/spf13/cobra v0.0.3 h1:ZlrZ4XsMRm04Fr5pSFxBgfND2EBVa1nLpiy1stUsX/8=
+github.com/spf13/cobra v0.0.3/go.mod h1:1l0Ry5zgKvJasoi3XT1TypsSe7PqH0Sj9dhYf7v3XqQ=
+github.com/spf13/pflag v1.0.1 h1:aCvUg6QPl3ibpQUxyLkrEkCHtPqYJL4x9AuhqVqFis4=
+github.com/spf13/pflag v1.0.1/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
+github.com/zmb3/spotify v0.0.0-20180212041948-79deba8533f6 h1:07d/UYzbd/YHT31y8aiRg/eG7YuTqYm1XPgXMg2PEAo=
+github.com/zmb3/spotify v0.0.0-20180212041948-79deba8533f6/go.mod h1:pHsWAmY9PfX7i/uwPZkmWrebc8JbK8FppKbvyevwzSU=
+golang.org/x/net v0.0.0-20180530234432-1e491301e022 h1:MVYFTUmVD3/+ERcvRRI+P/C2+WOUimXh+Pd8LVsklZ4=
+golang.org/x/net v0.0.0-20180530234432-1e491301e022/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
+golang.org/x/oauth2 v0.0.0-20180529203656-ec22f46f877b h1:nCwwlzLoBQhkY/S3CJ2CGAU4pYfR8+5/TPGEHT+p5Nk=
+golang.org/x/oauth2 v0.0.0-20180529203656-ec22f46f877b/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
+google.golang.org/appengine v1.0.0/go.mod h1:EbEs0AVv82hx2wNQdGPgUI5lhzA/G0D9YwlJXL52JkM=
