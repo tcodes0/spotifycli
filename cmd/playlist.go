@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	addtoPlaylistName string
+	addToPlaylistName string
 )
 
 var (
@@ -58,27 +58,29 @@ func newCurrentTrackCmd() *cobra.Command {
 }
 
 func newShowTrackCmd() *cobra.Command {
-	addtoCmd := &cobra.Command{
+	addToCmd := &cobra.Command{
 		Use:   "show --tid [TRACK_ID]",
 		Short: "Display information about a track by ID",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return displayTrackById(cmd, args)
 		},
 	}
-	addtoCmd.Flags().StringVar(&trackID, "tid", "", "Id of track to display.")
-	return addtoCmd
+	addToCmd.Flags().StringVar(&trackID, "tid", "", "Id of track to display.")
+
+	return addToCmd
 }
 
-func newAddtoPlaylistCmd() *cobra.Command {
-	addtoCmd := &cobra.Command{
+func newAddToPlaylistCmd() *cobra.Command {
+	addToCmd := &cobra.Command{
 		Use:   "ato --p [PLAYLIST_NAME]",
 		Short: "Add currently playing track to playlist",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return addto(cmd, args)
+			return addTo(cmd, args)
 		},
 	}
-	addtoCmd.Flags().StringVar(&addtoPlaylistName, "p", "", "Add current track to specified playlist.")
-	return addtoCmd
+	addToCmd.Flags().StringVar(&addToPlaylistName, "p", "", "Add current track to specified playlist.")
+
+	return addToCmd
 }
 
 func newAddTrackByIDToPlaylistCmd() *cobra.Command {
@@ -203,8 +205,12 @@ func displayTrackById(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-  displayTrack(track)
-  return nil
+	err = displayTrack(track)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func displayCurrentTrack(cmd *cobra.Command, args []string) error {
@@ -221,11 +227,15 @@ func displayCurrentTrack(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-  displayTrack(playing.Item)
+	err = displayTrack(playing.Item)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func addto(cmd *cobra.Command, args []string) error {
+func addTo(cmd *cobra.Command, args []string) error {
 	// current user
 	user, err := client.CurrentUser()
 	if err != nil {
@@ -234,7 +244,7 @@ func addto(cmd *cobra.Command, args []string) error {
 	fmt.Println("User: ", user.DisplayName)
 
 	// get my playlists
-	pl, err := getPlaylistByName(addtoPlaylistName)
+	pl, err := getPlaylistByName(addToPlaylistName)
 	if err != nil {
 		return err
 	}
@@ -417,6 +427,9 @@ func rmTrackByNameFromPlaylist(cmd *cobra.Command, args []string) error {
 	// get track in playlist and validate existence
 	var matchedTrack spotify.SimpleTrack
 	ptracks, err := client.GetPlaylistTracks(user.ID, pl.ID)
+	if err != nil {
+		return err
+	}
 	for _, t := range ptracks.Tracks {
 		if rmTrackName == t.Track.SimpleTrack.Name {
 			matchedTrack = t.Track.SimpleTrack
@@ -485,7 +498,7 @@ func getPlaylists() (*spotify.SimplePlaylistPage, error) {
 		return &(spotify.SimplePlaylistPage{}), err
 	}
 
-  return playlists, nil
+	return playlists, nil
 }
 
 func getPlaylistByName(playlistName string) (spotify.SimplePlaylist, error) {

@@ -51,7 +51,12 @@ func authorize(cmd *cobra.Command, args []string) error {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Got request for: ", r.URL.String())
 	})
-	go http.ListenAndServe(":8080", nil)
+	go func() {
+		err := http.ListenAndServe(":8080", nil)
+		if err != nil {
+			log.Fatal("ListenAndServe: ", err)
+		}
+	}()
 
 	// User authentication process
 	fmt.Println("authorize")

@@ -40,7 +40,7 @@ func search(cmd *cobra.Command, args []string) error {
 	case "pl":
 		return displaySearchPlaylists(searchQuery)
 	default:
-		return errors.New("Not supported")
+		return errors.New("not supported")
 	}
 }
 

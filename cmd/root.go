@@ -28,8 +28,8 @@ func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:               "spotifycli",
 		Short:             "A command line interface to manage Spotify playlists.",
-		PersistentPreRun:  prerun,
-		PersistentPostRun: postrun,
+		PersistentPreRun:  preRun,
+		PersistentPostRun: postRun,
 	}
 	// auth ops
 	rootCmd.AddCommand(newLoginCmd())
@@ -43,16 +43,17 @@ func NewRootCmd() *cobra.Command {
 	rootCmd.AddCommand(newListPlaylistsCmd())
 	rootCmd.AddCommand(newCreatePlaylistCmd())
 	rootCmd.AddCommand(newDeletePlaylistCmd())
-	rootCmd.AddCommand(newAddtoPlaylistCmd())
+	rootCmd.AddCommand(newAddToPlaylistCmd())
 	rootCmd.AddCommand(newAddTrackByIDToPlaylistCmd())
 	rootCmd.AddCommand(newAddTrackByNameToPlaylistCmd())
 	rootCmd.AddCommand(newRemoveTrackFromPlaylistCmd())
 	rootCmd.AddCommand(newListPlaylistTracksCmd())
 	rootCmd.AddCommand(newShowTrackCmd())
+
 	return rootCmd
 }
 
-func prerun(cmd *cobra.Command, args []string) {
+func preRun(cmd *cobra.Command, args []string) {
 	// initialize authenticator
 	auth = spotify.NewAuthenticator(
 		redirectURI,
@@ -78,7 +79,7 @@ func prerun(cmd *cobra.Command, args []string) {
 	client = auth.NewClient(token)
 }
 
-func postrun(cmd *cobra.Command, args []string) {
+func postRun(cmd *cobra.Command, args []string) {
 	// exit early
 	if cmd.Use == "login" || cmd.Use == "logout" {
 		return
