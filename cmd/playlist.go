@@ -13,37 +13,27 @@ import (
 
 var (
 	addToPlaylistName string
-)
 
-var (
 	trackID string
-)
 
-var (
 	addTrackID                 string
 	addTrackByIDToPlaylistName string
-)
 
-var (
 	addTrackName                 string
 	addTrackByNameToPlaylistName string
-)
 
-var (
 	rmTrackName             string
 	rmTrackFromPlaylistName string
-)
 
-var (
 	newPlaylistName string
-)
 
-var (
 	delPlaylistName string
-)
 
-var (
-	listPlaylistTracksName string
+	flagListPlaylistTracksName string
+
+	flagListPlaylistTracksOffset = "offset"
+
+	spotifyMaxLimit = 100
 )
 
 func newCurrentTrackCmd() *cobra.Command {
@@ -165,7 +155,10 @@ func newListPlaylistTracksCmd() *cobra.Command {
 			return listTracksFromPlaylist(cmd, args)
 		},
 	}
-	listCmd.Flags().StringVar(&listPlaylistTracksName, "p", "", "Name of playlist to list tracks from.")
+
+	listCmd.Flags().StringVar(&flagListPlaylistTracksName, "p", "", "Name of playlist to list tracks from.")
+	listCmd.Flags().Int(flagListPlaylistTracksOffset, 0, "Offset to paginate long playlists")
+
 	return listCmd
 }
 
@@ -458,13 +451,25 @@ func listTracksFromPlaylist(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("User: ", user.DisplayName)
 
-	pl, err := getPlaylistByName(listPlaylistTracksName)
+	pl, err := getPlaylistByName(flagListPlaylistTracksName)
 	if err != nil {
 		return err
 	}
 
+	flags := cmd.Flags()
+
+	offset, err := flags.GetInt(flagListPlaylistTracksOffset)
+	if err != nil {
+		return fmt.Errorf("GetInt flag offset %w", err)
+	}
+
+	opts := &spotify.Options{
+		Limit:  &spotifyMaxLimit,
+		Offset: &offset,
+	}
+
 	// get tracks from playlist
-	tracks, err := client.GetPlaylistTracks(pl.ID)
+	tracks, err := client.GetPlaylistTracksOpt(pl.ID, opts, "")
 	if err != nil {
 		return err
 	}
