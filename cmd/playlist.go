@@ -471,24 +471,35 @@ func listTracksFromPlaylist(cmd *cobra.Command, args []string) error {
 
 	// format resulting data
 	var data [][]interface{}
+
 	if tracks.Tracks != nil {
 		for _, item := range tracks.Tracks {
+			artist := item.Track.Artists[0].Name
+
+			if len(item.Track.Artists) > 0 {
+				for _, a := range item.Track.Artists {
+					artist += ", " + a.Name
+				}
+			}
+
 			track := []string{
-				string(item.Track.ID),
-				item.Track.Name,
-				item.Track.Album.Name,
 				item.Track.Artists[0].Name,
-				strconv.Itoa(item.Track.Popularity)}
+				item.Track.Name,
+				string(item.Track.ID),
+			}
+
 			row := make([]interface{}, len(track))
+
 			for i, d := range track {
 				row[i] = d
 			}
+
 			data = append(data, row)
 		}
 	}
 
 	// pretty print track results
-	printSimple([]string{"ID", "Name", "Album", "Artist", "Popularity"}, data)
+	printSimple([]string{"Artist", "Name", "ID"}, data)
 	return nil
 }
 
