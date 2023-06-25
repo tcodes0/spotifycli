@@ -194,6 +194,11 @@ func searchPlaylists(query string) ([][]interface{}, error) {
 
 func printSimple(headers []string, data [][]interface{}) {
 	tabulate := gotabulate.Create(data)
+
 	tabulate.SetHeaders(headers)
+	tabulate.SetAlign("left")
+	// tabulate.SetMaxCellSize(50)
+	// tabulate.SetWrapStrings(true)
+
 	fmt.Println(tabulate.Render("simple"))
 }
