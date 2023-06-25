@@ -73,7 +73,7 @@ func preRun(cmd *cobra.Command, args []string) {
 	token, err := getToken()
 	if err != nil {
 		if err := authorize(cmd, args); err != nil {
-			log.Fatal(err)
+			log.Fatal("authorize: ", err)
 		}
 	}
 	client = auth.NewClient(token)
@@ -88,15 +88,15 @@ func postRun(cmd *cobra.Command, args []string) {
 	// refresh token
 	currTok, err := client.Token()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("client token: ", err)
 	}
 	token, err := getToken()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("getToken: ", err)
 	}
 	if token != currTok {
 		if err := persistToken(token); err != nil {
-			log.Fatal(err)
+			log.Fatal("persistToken: ", err)
 		}
 	}
 }

@@ -8,6 +8,6 @@ import (
 
 func main() {
 	if err := cmd.NewRootCmd().Execute(); err != nil {
-		log.Fatal(err)
+		log.Fatal("execute: ", err)
 	}
 }

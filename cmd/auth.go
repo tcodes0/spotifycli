@@ -72,7 +72,7 @@ func (handler *authenticationHandler) ServeHTTP(w http.ResponseWriter, r *http.R
 	token, err := handler.auth.Token(handler.state, r)
 	if err != nil {
 		http.Error(w, "Couldn't get token", http.StatusForbidden)
-		log.Fatal(err)
+		log.Fatal("handler.auth.Token: ", err)
 	}
 	if st := r.FormValue("state"); st != handler.state {
 		http.NotFound(w, r)

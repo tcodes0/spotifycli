@@ -15,8 +15,14 @@ export SPOTIFY_SECRET=xxx
 
 ## Usage
 
+### login
+
+To login, add `"http://localhost:8080/callback"` to your spotify app redirect URLs
+
 ### Commands
+
 List of available commands:
+
 ```
 $ ./spotifycli --help
 A command line interface to manage Spotify playlists.
@@ -47,6 +53,7 @@ Use "spotifycli [command] --help" for more information about a command.
 ```
 
 ### Search
+
 Search using query terms on top of tracks (`tr`), albums (`al`), artists (`ar`) or playlists (`pl`) by name.
 
 ```
@@ -63,6 +70,7 @@ Flags:
 ```
 
 Sample search for type `tr` (track).
+
 ```
 ./spotifycli search --t "tr" --q "one step closer - live"
 ```
