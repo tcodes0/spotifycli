@@ -12,38 +12,26 @@ import (
 )
 
 var (
-	addtoPlaylistName string
-)
+	addToPlaylistName string
 
-var (
 	trackID string
-)
 
-var (
 	addTrackID                 string
 	addTrackByIDToPlaylistName string
-)
 
-var (
 	addTrackName                 string
 	addTrackByNameToPlaylistName string
-)
 
-var (
 	rmTrackName             string
 	rmTrackFromPlaylistName string
-)
 
-var (
 	newPlaylistName string
-)
 
-var (
 	delPlaylistName string
-)
 
-var (
-	listPlaylistTracksName string
+	flagListPlaylistTracksName string
+
+	spotifyMaxLimit = 100
 )
 
 func newCurrentTrackCmd() *cobra.Command {
@@ -58,27 +46,29 @@ func newCurrentTrackCmd() *cobra.Command {
 }
 
 func newShowTrackCmd() *cobra.Command {
-	addtoCmd := &cobra.Command{
+	addToCmd := &cobra.Command{
 		Use:   "show --tid [TRACK_ID]",
 		Short: "Display information about a track by ID",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return displayTrackById(cmd, args)
 		},
 	}
-	addtoCmd.Flags().StringVar(&trackID, "tid", "", "Id of track to display.")
-	return addtoCmd
+	addToCmd.Flags().StringVar(&trackID, "tid", "", "Id of track to display.")
+
+	return addToCmd
 }
 
-func newAddtoPlaylistCmd() *cobra.Command {
-	addtoCmd := &cobra.Command{
+func newAddToPlaylistCmd() *cobra.Command {
+	addToCmd := &cobra.Command{
 		Use:   "ato --p [PLAYLIST_NAME]",
 		Short: "Add currently playing track to playlist",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return addto(cmd, args)
+			return addTo(cmd, args)
 		},
 	}
-	addtoCmd.Flags().StringVar(&addtoPlaylistName, "p", "", "Add current track to specified playlist.")
-	return addtoCmd
+	addToCmd.Flags().StringVar(&addToPlaylistName, "p", "", "Add current track to specified playlist.")
+
+	return addToCmd
 }
 
 func newAddTrackByIDToPlaylistCmd() *cobra.Command {
@@ -163,7 +153,9 @@ func newListPlaylistTracksCmd() *cobra.Command {
 			return listTracksFromPlaylist(cmd, args)
 		},
 	}
-	listCmd.Flags().StringVar(&listPlaylistTracksName, "p", "", "Name of playlist to list tracks from.")
+
+	listCmd.Flags().StringVar(&flagListPlaylistTracksName, "p", "", "Name of playlist to list tracks from.")
+
 	return listCmd
 }
 
@@ -190,12 +182,6 @@ func displayTrack(track *spotify.FullTrack) error {
 }
 
 func displayTrackById(cmd *cobra.Command, args []string) error {
-	// current user
-	user, err := client.CurrentUser()
-	if err != nil {
-		return err
-	}
-	fmt.Println("User: ", user.DisplayName)
 
 	// get the track (check for existence)
 	track, err := client.GetTrack(spotify.ID(trackID))
@@ -203,17 +189,15 @@ func displayTrackById(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-  displayTrack(track)
-  return nil
-}
-
-func displayCurrentTrack(cmd *cobra.Command, args []string) error {
-	// current user
-	user, err := client.CurrentUser()
+	err = displayTrack(track)
 	if err != nil {
 		return err
 	}
-	fmt.Println("User: ", user.DisplayName)
+
+	return nil
+}
+
+func displayCurrentTrack(cmd *cobra.Command, args []string) error {
 
 	// get current playing song
 	playing, err := client.PlayerCurrentlyPlaying()
@@ -221,20 +205,18 @@ func displayCurrentTrack(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-  displayTrack(playing.Item)
-	return nil
-}
-
-func addto(cmd *cobra.Command, args []string) error {
-	// current user
-	user, err := client.CurrentUser()
+	err = displayTrack(playing.Item)
 	if err != nil {
 		return err
 	}
-	fmt.Println("User: ", user.DisplayName)
+
+	return nil
+}
+
+func addTo(cmd *cobra.Command, args []string) error {
 
 	// get my playlists
-	pl, err := getPlaylistByName(addtoPlaylistName)
+	pl, err := getPlaylistByName(addToPlaylistName)
 	if err != nil {
 		return err
 	}
@@ -248,7 +230,7 @@ func addto(cmd *cobra.Command, args []string) error {
 	fmt.Println("Track: ", playing.Item.Name)
 
 	// add track to playlist
-	_, err = client.AddTracksToPlaylist(user.ID, pl.ID, playing.Item.ID)
+	_, err = client.AddTracksToPlaylist(pl.ID, playing.Item.ID)
 	if err != nil {
 		return err
 	}
@@ -257,12 +239,6 @@ func addto(cmd *cobra.Command, args []string) error {
 }
 
 func listPlaylists(cmd *cobra.Command, args []string) error {
-	// current user
-	user, err := client.CurrentUser()
-	if err != nil {
-		return err
-	}
-	fmt.Println("User: ", user.DisplayName)
 
 	// get all playlists for the user
 	playlists, err := getPlaylists()
@@ -295,15 +271,13 @@ func listPlaylists(cmd *cobra.Command, args []string) error {
 }
 
 func newPlaylist(cmd *cobra.Command, args []string) error {
-	// current user
 	user, err := client.CurrentUser()
 	if err != nil {
 		return err
 	}
-	fmt.Println("User: ", user.DisplayName)
 
 	// create new playlist
-	playlist, err := client.CreatePlaylistForUser(user.ID, newPlaylistName, true)
+	playlist, err := client.CreatePlaylistForUser(user.ID, newPlaylistName, "", true)
 	if err != nil {
 		return err
 	}
@@ -312,12 +286,10 @@ func newPlaylist(cmd *cobra.Command, args []string) error {
 }
 
 func deletePlaylist(cmd *cobra.Command, args []string) error {
-	// current user
 	user, err := client.CurrentUser()
 	if err != nil {
 		return err
 	}
-	fmt.Println("User: ", user.DisplayName)
 
 	// get the playlist
 	pl, err := getPlaylistByName(delPlaylistName)
@@ -331,12 +303,6 @@ func deletePlaylist(cmd *cobra.Command, args []string) error {
 }
 
 func addTrackByIDToPlaylist(cmd *cobra.Command, args []string) error {
-	// current user
-	user, err := client.CurrentUser()
-	if err != nil {
-		return err
-	}
-	fmt.Println("User: ", user.DisplayName)
 
 	// get the playlist by name
 	pl, err := getPlaylistByName(addTrackByIDToPlaylistName)
@@ -353,7 +319,7 @@ func addTrackByIDToPlaylist(cmd *cobra.Command, args []string) error {
 	fmt.Println("Track: ", tr.Name)
 
 	// add track to playlist
-	_, err = client.AddTracksToPlaylist(user.ID, pl.ID, tr.ID)
+	_, err = client.AddTracksToPlaylist(pl.ID, tr.ID)
 	if err != nil {
 		return err
 	}
@@ -362,12 +328,6 @@ func addTrackByIDToPlaylist(cmd *cobra.Command, args []string) error {
 }
 
 func addTrackByNameToPlaylist(cmd *cobra.Command, args []string) error {
-	// current user
-	user, err := client.CurrentUser()
-	if err != nil {
-		return err
-	}
-	fmt.Println("User: ", user.DisplayName)
 
 	// get the playlist by name
 	pl, err := getPlaylistByName(addTrackByNameToPlaylistName)
@@ -389,7 +349,7 @@ func addTrackByNameToPlaylist(cmd *cobra.Command, args []string) error {
 		fmt.Println("Track: ", tracks[0].Name)
 
 		// add track to playlist
-		_, err = client.AddTracksToPlaylist(user.ID, pl.ID, tracks[0].ID)
+		_, err = client.AddTracksToPlaylist(pl.ID, tracks[0].ID)
 		if err != nil {
 			return err
 		}
@@ -401,12 +361,6 @@ func addTrackByNameToPlaylist(cmd *cobra.Command, args []string) error {
 }
 
 func rmTrackByNameFromPlaylist(cmd *cobra.Command, args []string) error {
-	// current user
-	user, err := client.CurrentUser()
-	if err != nil {
-		return err
-	}
-	fmt.Println("User: ", user.DisplayName)
 
 	// get the playlist by name
 	pl, err := getPlaylistByName(rmTrackFromPlaylistName)
@@ -416,7 +370,10 @@ func rmTrackByNameFromPlaylist(cmd *cobra.Command, args []string) error {
 
 	// get track in playlist and validate existence
 	var matchedTrack spotify.SimpleTrack
-	ptracks, err := client.GetPlaylistTracks(user.ID, pl.ID)
+	ptracks, err := client.GetPlaylistTracks(pl.ID)
+	if err != nil {
+		return err
+	}
 	for _, t := range ptracks.Tracks {
 		if rmTrackName == t.Track.SimpleTrack.Name {
 			matchedTrack = t.Track.SimpleTrack
@@ -429,7 +386,7 @@ func rmTrackByNameFromPlaylist(cmd *cobra.Command, args []string) error {
 	fmt.Println("Track: ", matchedTrack.Name)
 
 	// remove track from playlist
-	_, err = client.RemoveTracksFromPlaylist(user.ID, pl.ID, matchedTrack.ID)
+	_, err = client.RemoveTracksFromPlaylist(pl.ID, matchedTrack.ID)
 	if err != nil {
 		return err
 	}
@@ -438,44 +395,69 @@ func rmTrackByNameFromPlaylist(cmd *cobra.Command, args []string) error {
 }
 
 func listTracksFromPlaylist(cmd *cobra.Command, args []string) error {
-	// current user
-	user, err := client.CurrentUser()
-	if err != nil {
-		return err
-	}
-	fmt.Println("User: ", user.DisplayName)
-
-	pl, err := getPlaylistByName(listPlaylistTracksName)
+	pl, err := getPlaylistByName(flagListPlaylistTracksName)
 	if err != nil {
 		return err
 	}
 
-	// get tracks from playlist
-	tracks, err := client.GetPlaylistTracks(user.ID, pl.ID)
-	if err != nil {
-		return err
+	opts := &spotify.Options{
+		Limit: &spotifyMaxLimit,
+	}
+
+	var tracks []spotify.PlaylistTrack
+	i := 0
+
+	for {
+		offset := i
+		opts.Offset = &offset
+
+		res, err := client.GetPlaylistTracksOpt(pl.ID, opts, "")
+		if err != nil {
+			return fmt.Errorf("could not get playlist tracks: %v", err)
+		}
+
+		tracks = append(tracks, res.Tracks...)
+
+		if len(res.Tracks) < spotifyMaxLimit {
+			break
+		}
+
+		i += spotifyMaxLimit
 	}
 
 	// format resulting data
-	var data [][]interface{}
-	if tracks.Tracks != nil {
-		for _, item := range tracks.Tracks {
+	var data = make([][]interface{}, 0, len(tracks))
+
+	if len(tracks) > 0 {
+		for _, item := range tracks {
+			artist := item.Track.Artists[0].Name
+
+			if len(item.Track.Artists) > 0 {
+				for _, a := range item.Track.Artists {
+					artist += ", " + a.Name
+				}
+			}
+
 			track := []string{
-				string(item.Track.ID),
-				item.Track.Name,
-				item.Track.Album.Name,
 				item.Track.Artists[0].Name,
-				strconv.Itoa(item.Track.Popularity)}
+				item.Track.Name,
+				secondsToMinutes(item.Track.Duration / 1000),
+				string(item.Track.ID),
+			}
+
 			row := make([]interface{}, len(track))
+
 			for i, d := range track {
 				row[i] = d
 			}
+
 			data = append(data, row)
 		}
+
+		// pretty print track results
+		printSimple([]string{"Artist", "Name", "Duration", "ID"}, data)
 	}
 
-	// pretty print track results
-	printSimple([]string{"ID", "Name", "Album", "Artist", "Popularity"}, data)
 	return nil
 }
 
@@ -485,7 +467,7 @@ func getPlaylists() (*spotify.SimplePlaylistPage, error) {
 		return &(spotify.SimplePlaylistPage{}), err
 	}
 
-  return playlists, nil
+	return playlists, nil
 }
 
 func getPlaylistByName(playlistName string) (spotify.SimplePlaylist, error) {
@@ -509,4 +491,15 @@ func getPlaylistByName(playlistName string) (spotify.SimplePlaylist, error) {
 		return spotify.SimplePlaylist{}, fmt.Errorf("playlist not found: %s", playlistName)
 	}
 	return matchPlaylist, nil
+}
+
+func secondsToMinutes(seconds int) string {
+	minutes := seconds / 60
+	remainder := seconds % 60
+
+	if remainder < 10 {
+		return fmt.Sprintf("%d:0%d", minutes, remainder)
+	}
+
+	return fmt.Sprintf("%d:%d", minutes, remainder)
 }
