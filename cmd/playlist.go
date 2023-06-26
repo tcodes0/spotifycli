@@ -31,8 +31,6 @@ var (
 
 	flagListPlaylistTracksName string
 
-	flagListPlaylistTracksOffset = "offset"
-
 	spotifyMaxLimit = 100
 )
 
@@ -157,7 +155,6 @@ func newListPlaylistTracksCmd() *cobra.Command {
 	}
 
 	listCmd.Flags().StringVar(&flagListPlaylistTracksName, "p", "", "Name of playlist to list tracks from.")
-	listCmd.Flags().Int(flagListPlaylistTracksOffset, 0, "Offset to paginate long playlists")
 
 	return listCmd
 }
@@ -403,29 +400,36 @@ func listTracksFromPlaylist(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	flags := cmd.Flags()
-
-	offset, err := flags.GetInt(flagListPlaylistTracksOffset)
-	if err != nil {
-		return fmt.Errorf("GetInt flag offset %w", err)
-	}
-
 	opts := &spotify.Options{
-		Limit:  &spotifyMaxLimit,
-		Offset: &offset,
+		Limit: &spotifyMaxLimit,
 	}
 
-	// get tracks from playlist
-	tracks, err := client.GetPlaylistTracksOpt(pl.ID, opts, "")
-	if err != nil {
-		return err
+	var tracks []spotify.PlaylistTrack
+	i := 0
+
+	for {
+		offset := i
+		opts.Offset = &offset
+
+		res, err := client.GetPlaylistTracksOpt(pl.ID, opts, "")
+		if err != nil {
+			return fmt.Errorf("could not get playlist tracks: %v", err)
+		}
+
+		tracks = append(tracks, res.Tracks...)
+
+		if len(res.Tracks) < spotifyMaxLimit {
+			break
+		}
+
+		i += spotifyMaxLimit
 	}
 
 	// format resulting data
-	var data [][]interface{}
+	var data = make([][]interface{}, 0, len(tracks))
 
-	if tracks.Tracks != nil {
-		for _, item := range tracks.Tracks {
+	if len(tracks) > 0 {
+		for _, item := range tracks {
 			artist := item.Track.Artists[0].Name
 
 			if len(item.Track.Artists) > 0 {
@@ -449,10 +453,11 @@ func listTracksFromPlaylist(cmd *cobra.Command, args []string) error {
 
 			data = append(data, row)
 		}
+
+		// pretty print track results
+		printSimple([]string{"Artist", "Name", "Duration", "ID"}, data)
 	}
 
-	// pretty print track results
-	printSimple([]string{"Artist", "Name", "Duration", "ID"}, data)
 	return nil
 }
 
